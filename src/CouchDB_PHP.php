@@ -151,7 +151,7 @@ class CouchDB_PHP {
 	
 	protected function is_id_set() {
 		try {
-			if(!empty($thsi->id)) throw new Exception('operation not possible - you have to set the id!');
+			if(!empty($this->id)) throw new Exception('operation not possible - you have to set the id!');
 		} catch (Exception $e) {
 			echo $e->getMessage();
 			return false;
