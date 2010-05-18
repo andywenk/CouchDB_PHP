@@ -19,7 +19,7 @@ class CouchDB_PHP {
 	protected $request;
 	protected $id;
 	
-	public function __construct($db) {
+	public function __construct($db = null) {
 		$this->db = $db;
 	}
 	
@@ -101,13 +101,11 @@ class CouchDB_PHP {
 	
 	public function http_request($type = 'GET', $json_data = '') {
 		$ch = curl_init();
-		echo $json_data;
+
 		if($type == 'PUT' || $type == 'POST') {
 			if(!empty($json_data)) {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-			} else {
-				return '{"error": "bad_request","reason": "no data to put or post"}';
-			}
+			} 
 		}
 
 		curl_setopt($ch, CURLOPT_URL, self::create_url());
