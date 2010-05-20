@@ -5,7 +5,7 @@
  * Here you can finde some examples for using the class. Remember, that you have to
  * change the _id and _rev when trying these examples
  * 
- * Andy Wenk <andy@nms.de>
+ * Andy Wenk <andy@nms.de> 
  */
 include_once('../src/CouchDB_PHP.php');
 

@@ -12,7 +12,7 @@
  *
  * copyright (c) 2010 Andy Wenk <andy@nms.de>
  * license: BSD License
- * requires PHP 5.x, php5-curl
+ * requires PHP 5.x, php5-curl 
  */
 class CouchDB_PHP {
 	protected $db;
