@@ -31,156 +31,155 @@ class CouchDB_PHP {
         $this->port = $port;
     }
 	
-	public function set_protocol($protocol) {
-		$this->protocol = $protocol;
-	}
+    public function set_protocol($protocol) {
+        $this->protocol = $protocol;
+    }
 	
-	public function set_host($host) {
-		$this->host = $host;
-	}
+    public function set_host($host) {
+        $this->host = $host;
+    }
 	
-	public function set_id($id) {
-		$this->id = urlencode($id);
-	}
+    public function set_id($id) {
+        $this->id = urlencode($id);
+    }
 	
-	public function set_response_type($type) {
-		$this->response_type = $type;
-	}
+    public function set_response_type($type) {
+        $this->response_type = $type;
+    }
 	
-	public function get_uuid() {
-		$this->request = '_uuids/';
-		$id_arr = self::parse_response(self::http_request());
+    public function get_uuid() {
+        $this->request = '_uuids/';
+        $id_arr = self::parse_response(self::http_request());
 		
-		return $id_arr['uuids'][0];
-	}
+        return $id_arr['uuids'][0];
+    }
 	
-	public function show_all_dbs() {
-		$this->request = '_all_dbs/';
+    public function show_all_dbs() {
+        $this->request = '_all_dbs/';
 		
-		return self::parse_response(self::http_request());
-	}
+        return self::parse_response(self::http_request());
+    }
 	
-	public function create_db($name) {
-		$this->request = "{$name}/";
-		return self::parse_response(self::http_request('PUT'));
-	}
+    public function create_db($name) {
+        $this->request = "{$name}/";
+        return self::parse_response(self::http_request('PUT'));
+    }
 	
-	public function delete_db($name) {
-		$this->request = "{$name}/";
-		return self::parse_response(self::http_request('DELETE'));
-	}
+    public function delete_db($name) {
+        $this->request = "{$name}/";
+        return self::parse_response(self::http_request('DELETE'));
+    }
 	
-	public function create_doc($data) {
-		if(!self::is_db_set()) return self::error('no_db');
-		$method = (empty($this->id)) ? 'POST' : 'PUT'; 
-		$this->request = "{$this->db}/{$this->id}/";
-		if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
+    public function create_doc($data) {
+        if(!self::is_db_set()) return self::error('no_db');
+        $method = (empty($this->id)) ? 'POST' : 'PUT'; 
+        $this->request = "{$this->db}/{$this->id}/";
+        if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
 		
-		return self::parse_response(self::http_request($method, $json_data));
-	}
+        return self::parse_response(self::http_request($method, $json_data));
+    }
 	
-	public function update_doc($data) {
-		if(!self::is_db_set()) return self::error('no_db');
-		if(!self::is_rev_set($data)) return self::error('no_rev');
-		if(!self::is_id_set()) return self::error('no_id');
+    public function update_doc($data) {
+        if(!self::is_db_set()) return self::error('no_db');
+        if(!self::is_rev_set($data)) return self::error('no_rev');
+        if(!self::is_id_set()) return self::error('no_id');
 		
-		$this->request = "{$this->db}/{$this->id}/";
-		if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
+        $this->request = "{$this->db}/{$this->id}/";
+        if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
 
-		return self::parse_response(self::http_request('PUT', $json_data));
-	}
+        return self::parse_response(self::http_request('PUT', $json_data));
+    }
 	
-	public function get_doc() {
-		if(!self::is_db_set()) return self::error('no_db');
-		if(!self::is_id_set()) return self::error('no_id');
-		$this->request = "{$this->db}/{$this->id}/";
+    public function get_doc() {
+        if(!self::is_db_set()) return self::error('no_db');
+        if(!self::is_id_set()) return self::error('no_id');
+        $this->request = "{$this->db}/{$this->id}/";
 		
-		return self::parse_response(self::http_request());
-	}
+        return self::parse_response(self::http_request());
+    }
 	
-	public function get_all_docs() {
-		if(!self::is_db_set()) return self::error('no_db');
-		$this->request = "{$this->db}/_all_docs/";
-		return self::parse_response(self::http_request());
-	}
+    public function get_all_docs() {
+        if(!self::is_db_set()) return self::error('no_db');
+        $this->request = "{$this->db}/_all_docs/";
+        return self::parse_response(self::http_request());
+    }
 	
-	public function delete_doc($data) {
-		if(!self::is_db_set()) return self::error('no_db');
-		if(!self::is_rev_set($data)) return self::error('no_rev');
-		if(!self::is_id_set()) return self::error('no_id');
-		$this->request = "{$this->db}/{$this->id}?rev={$data['_rev']}" ;
+    public function delete_doc($data) {
+        if(!self::is_db_set()) return self::error('no_db'); 
+        if(!self::is_rev_set($data)) return self::error('no_rev');
+        if(!self::is_id_set()) return self::error('no_id');
+        $this->request = "{$this->db}/{$this->id}?rev={$data['_rev']}" ;
 		
-		return self::parse_response(self::http_request('DELETE'));
-	}
+        return self::parse_response(self::http_request('DELETE'));
+    }
 	
-	public function http_request($type = 'GET', $json_data = '') {
-		$ch = curl_init();
+    public function http_request($type = 'GET', $json_data = '') {
+        $ch = curl_init();
 
-		if($type == 'PUT' || $type == 'POST') {
-			if(!empty($json_data)) {
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-			} 
-		}
+        if($type == 'PUT' || $type == 'POST') {
+            if(!empty($json_data)) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+            } 
+        }
 
-		curl_setopt($ch, CURLOPT_URL, self::create_url());
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_USERAGENT, 'CouchDB_PHP');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
+        curl_setopt($ch, CURLOPT_URL, self::create_url());
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'CouchDB_PHP');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
 		
-		$result = curl_exec($ch);
-		curl_close($ch);
+        $result = curl_exec($ch);
+        curl_close($ch);
 		
-		return $result;
-	}
+        return $result;
+    }
 	
-	protected function create_url() {
-		if(empty($this->request)) return self::error('create_url_no_request');
-		return "{$this->protocol}://{$this->host}:{$this->port}/{$this->request}";
-	}
+    protected function create_url() {
+        if(empty($this->request)) return self::error('create_url_no_request');
+        return "{$this->protocol}://{$this->host}:{$this->port}/{$this->request}";
+    }
 	
-	protected function parse_response($response) {
-		return ($this->response_type == 'array') ? json_decode($response, true) : $response;
-	}
+    protected function parse_response($response) {
+        return ($this->response_type == 'array') ? json_decode($response, true) : $response;
+    }
 	
-	protected function create_json_data($data) {
-		return (!$json_data = json_encode($data)) ? false : $json_data;
-	}
+    protected function create_json_data($data) {
+        return (!$json_data = json_encode($data)) ? false : $json_data;
+    }
 	
-	protected function is_rev_set($data) {
-		return (!array_key_exists('_rev', $data)) ? false : true;
-	}
+    protected function is_rev_set($data) {
+        return (!array_key_exists('_rev', $data)) ? false : true;
+    }
 	
-	protected function is_id_set() {
-		return (empty($this->id)) ? false : true;
-	}
+    protected function is_id_set() {
+        return (empty($this->id)) ? false : true;
+    }
 	
-	protected function is_db_set() {
-		return (empty($this->db)) ? false : true;
-	}
+    protected function is_db_set() {
+        return (empty($this->db)) ? false : true;
+    }
 	
-	protected function error($type) {
-		switch($type) {
-			case 'no_db':
-				return self::parse_response('{"error":"operation impossible", "reason":"no db set"}');
-			break;
+    protected function error($type) {
+        switch($type) {
+            case 'no_db':
+                return self::parse_response('{"error":"operation impossible", "reason":"no db set"}');
+            break;
 			
-			case 'no_rev':
-				return self::parse_response('{"error":"operation impossible", "reason":"no _rev set"}');
-			break;
+            case 'no_rev':
+                return self::parse_response('{"error":"operation impossible", "reason":"no _rev set"}');
+            break;
 			
-			case 'no_id':
-				return self::parse_response('{"error":"operation impossible", "reason":"no _id set"}');
-			break;	
+            case 'no_id':
+                return self::parse_response('{"error":"operation impossible", "reason":"no _id set"}');
+            break;	
 			
-			case 'no_json_data':
-				return self::parse_response('{"error":"operation impossible", "reason":"no json data set"}');
-			break;
+            case 'no_json_data':
+                return self::parse_response('{"error":"operation impossible", "reason":"no json data set"}');
+            break;
 			
-			case 'create_url_no_request':
-				return self::parse_response('{"error":"create url impossible", "reason":"no request set"}');
-			break;		
-		}
-	}
-	
+            case 'create_url_no_request':
+                return self::parse_response('{"error":"create url impossible", "reason":"no request set"}');
+            break;		
+        }
+    }
 }
