@@ -15,10 +15,10 @@
  * requires PHP 5.x, php5-curl 
  */
 class CouchDB_PHP {
+    public $port = 5984;
+    public $protocol = 'http';
+    public $host = "127.0.0.1";
     protected $db;
-    protected $port = 5984;
-    protected $protocol = 'http';
-    protected $host = "127.0.0.1";
     protected $id;
     protected $response_type = 'array';
     protected $request;
@@ -27,17 +27,9 @@ class CouchDB_PHP {
         $this->db = $db;
     }
 	
-    public function set_port($port) {
-        $this->port = $port;
-    }
-	
-    public function set_protocol($protocol) {
-        $this->protocol = $protocol;
-    }
-	
-    public function set_host($host) {
-        $this->host = $host;
-    }
+	public function set_db($db) {
+	    $this->db = $db;
+	}
 	
     public function set_id($id) {
         $this->id = urlencode($id);
@@ -62,6 +54,7 @@ class CouchDB_PHP {
 	
     public function create_db($name) {
         $this->request = "{$name}/";
+        $this->db = $name;
         return self::parse_response(self::http_request('PUT'));
     }
 	
