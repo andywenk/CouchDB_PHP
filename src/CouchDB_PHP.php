@@ -12,12 +12,14 @@
  * requires PHP 5.x, php5-curl
  */
 class CouchDB_PHP {
+	protected $db;
 	protected $port = 5984;
 	protected $protocol = 'http';
 	protected $host = "127.0.0.1";
-	protected $db;
-	protected $request;
 	protected $id;
+	protected $response_type = 'array';
+	protected $request;
+	
 	
 	public function __construct($db = null) {
 		$this->db = $db;
@@ -37,6 +39,10 @@ class CouchDB_PHP {
 	
 	public function set_id($id) {
 		$this->id = urlencode($id);
+	}
+	
+	public function set_response_type($type) {
+		$this->response_type = $type;
 	}
 	
 	public function get_uuid() {
@@ -71,16 +77,17 @@ class CouchDB_PHP {
 	}
 	
 	public function update_doc($data) {
-		if(!self::is_rev_set($data)) return false;
-		if(!self::is_id_set()) return false;
+		if(!self::is_rev_set($data)) return self::error('update_no_rev');
+		if(!self::is_id_set()) return self::error('update_no_id');
+		
 		$this->request = "{$this->db}/{$this->id}/";
 		$json_data = self::create_json_data($data);
-		
+
 		return self::parse_response(self::http_request('PUT', $json_data));
 	}
 	
 	public function get_doc() {
-		if(!self::is_id_set()) return false;
+		if(!self::is_id_set()) return self::error('update_no_id');
 		$this->request = "{$this->db}/{$this->id}/";
 		
 		return self::parse_response(self::http_request());
@@ -92,8 +99,8 @@ class CouchDB_PHP {
 	}
 	
 	public function delete_doc($data) {
-		if(!self::is_rev_set($data)) return false;
-		if(!self::is_id_set()) return false;
+		if(!self::is_rev_set($data)) return self::error('update_no_rev');
+		if(!self::is_id_set()) return self::error('update_no_id');
 		$this->request = "{$this->db}/{$this->id}?rev={$data['_rev']}" ;
 		
 		return self::parse_response(self::http_request('DELETE'));
@@ -121,42 +128,46 @@ class CouchDB_PHP {
 	}
 	
 	protected function create_url() {
+		if(empty($this->request)) return self::error('create_url_no_request');
 		return "{$this->protocol}://{$this->host}:{$this->port}/{$this->request}";
 	}
 	
 	protected function parse_response($response) {
-		return json_decode($response, true);
+		return ($this->response_type == 'array') ? json_decode($response, true) : $response;
 	}
 	
 	protected function create_json_data($data) {
-		try {
-			if(!$json_data = json_encode($data)) throw new Exception('set_data: not able to encode the data to JSON'); 
-		} catch (Exception $e){
-			echo $e->getMessage();
-			return false;
-		}
+		if(!$json_data = json_encode($data)) return false; 
 		
 		return $json_data;
 	}
 	
 	protected function is_rev_set($data) {
-		try {
-			if(!array_key_exists('_rev', $data)) throw new Exception('operation not possible - you have to set the _rev!');
-		} catch (Exception $e) {
-			echo $e->getMessage();
-			return false;
-		}
+		if(!array_key_exists('_rev', $data)) return false;
+
 		return true;
 	}
 	
 	protected function is_id_set() {
-		try {
-			if(!empty($this->id)) throw new Exception('operation not possible - you have to set the id!');
-		} catch (Exception $e) {
-			echo $e->getMessage();
-			return false;
-		}
+		if(empty($this->id)) return false;
+		
 		return true;
+	}
+	
+	protected function error($type) {
+		switch($type) {
+			case 'update_no_rev':
+				return self::parse_response('{"error":"update impossible", "reason":"no _rev set"}');
+			break;
+			
+			case 'update_no_id':
+				return self::parse_response('{"error":"update impossible", "reason":"no _id set"}');
+			break;	
+			
+			case 'create_url_no_request':
+				return self::parse_response('{"error":"create url impossible", "reason":"no request set"}');
+			break;		
+		}
 	}
 	
 }
