@@ -13,6 +13,7 @@ $cphp = new CouchDB_PHP('hanswurst');
 
 /*
 // create a document
+$cphp->set_id('prod_1');
 $data = array("name" => "andy", "alter" => 14);
 $res = $cphp->create_doc($data);
 */
@@ -27,7 +28,7 @@ $res = $cphp->update_doc($data);
 /*
 // get a document by id
 $cphp->set_response_type('json');
-$cphp->set_id('38dd7a1c6b047125c69cd7af730292a7');
+$cphp->set_id('prod_1');
 $res = $cphp->get_doc();
 */
 
