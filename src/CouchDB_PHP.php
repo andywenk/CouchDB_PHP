@@ -63,7 +63,7 @@ class CouchDB_PHP {
 	}
 	
 	public function create_doc($data) {
-		$method = (empty($id)) ? 'POST' : 'PUT'; 
+		$method = (empty($this->id)) ? 'POST' : 'PUT'; 
 		$this->request = "{$this->db}/{$this->id}/";
 		$json_data = self::create_json_data($data);
 		
