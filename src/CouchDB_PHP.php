@@ -18,6 +18,7 @@ class CouchDB_PHP {
     public $port = 5984;
     public $protocol = 'http';
     public $host = "127.0.0.1";
+    public $last_id;
     protected $db;
     protected $id;
     protected $response_type = 'array';
@@ -68,8 +69,16 @@ class CouchDB_PHP {
         $method = (empty($this->id)) ? 'POST' : 'PUT'; 
         $this->request = "{$this->db}/{$this->id}/";
         if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
+		$response = self::http_request($method, $json_data);
 		
-        return self::parse_response(self::http_request($method, $json_data));
+		self::set_last_id($response);
+		
+        return self::parse_response($response);
+    }
+    
+    protected function set_last_id($response) {
+        $response_array = json_decode($response, true);
+		$this->last_id = $response_array['id']; 
     }
 	
     public function update_doc($data) {

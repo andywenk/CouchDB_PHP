@@ -4,18 +4,23 @@
  * 
  * Here you can finde some examples for using the class. Remember, that you have to
  * change the _id and _rev when trying these examples
+ *
+ * You can simply call this with php cli: php -f couch_php_examples.php . Remember
+ * to uncomment an example to become a little more excited ;-)
  * 
  * Andy Wenk <andy@nms.de> 
  */
 include_once('../src/CouchDB_PHP.php');
 
 $couch = new CouchDB_PHP('hanswurst');
+$res = '';
 
 /*
 // create a document
-$couch->set_id('prod_1');
+$couch->set_id('prod_4');
 $data = array("name" => "andy", "alter" => 14);
 $res = $couch->create_doc($data);
+echo $couch->last_id;
 */
 
 /*
