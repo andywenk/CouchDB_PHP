@@ -15,13 +15,12 @@ include_once('../src/CouchDB_PHP.php');
 $couch = new CouchDB_PHP('hanswurst');
 $res = '';
 
-/*
+
 // create a document
-$couch->set_id('prod_4');
+$couch->set_id('prod_5');
 $data = array("name" => "andy", "alter" => 14);
 $res = $couch->create_doc($data);
-echo $couch->last_id;
-*/
+echo $couch->get_last_id();
 
 /*
 // update a document 

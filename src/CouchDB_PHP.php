@@ -18,7 +18,7 @@ class CouchDB_PHP {
     public $port = 5984;
     public $protocol = 'http';
     public $host = "127.0.0.1";
-    public $last_id;
+    protected $last_id;
     protected $db;
     protected $id;
     protected $response_type = 'array';
@@ -28,9 +28,9 @@ class CouchDB_PHP {
         $this->db = $db;
     }
 	
-	public function set_db($db) {
-	    $this->db = $db;
-	}
+    public function set_db($db) {
+        $this->db = $db;
+    }
 	
     public function set_id($id) {
         $this->id = urlencode($id);
@@ -46,6 +46,10 @@ class CouchDB_PHP {
 		
         return $id_arr['uuids'][0];
     }
+	
+	public function get_last_id() {
+	    return $this->last_id;
+	}
 	
     public function show_all_dbs() {
         $this->request = '_all_dbs/';
