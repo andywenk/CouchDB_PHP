@@ -17,7 +17,7 @@ $res = '';
 
 
 // create a document
-$couch->set_id('prod_5');
+$couch->set_id('prod_6');
 $data = array("name" => "andy", "alter" => 14);
 $res = $couch->create_doc($data);
 echo $couch->get_last_id();

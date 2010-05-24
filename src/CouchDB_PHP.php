@@ -47,9 +47,9 @@ class CouchDB_PHP {
         return $id_arr['uuids'][0];
     }
 	
-	public function get_last_id() {
-	    return $this->last_id;
-	}
+    public function get_last_id() {
+        return $this->last_id;
+    }
 	
     public function show_all_dbs() {
         $this->request = '_all_dbs/';
@@ -73,16 +73,8 @@ class CouchDB_PHP {
         $method = (empty($this->id)) ? 'POST' : 'PUT'; 
         $this->request = "{$this->db}/{$this->id}/";
         if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
-		$response = self::http_request($method, $json_data);
 		
-		self::set_last_id($response);
-		
-        return self::parse_response($response);
-    }
-    
-    protected function set_last_id($response) {
-        $response_array = json_decode($response, true);
-		$this->last_id = $response_array['id']; 
+        return self::http_request($method, $json_data);
     }
 	
     public function update_doc($data) {
@@ -93,7 +85,7 @@ class CouchDB_PHP {
         $this->request = "{$this->db}/{$this->id}/";
         if(!$json_data = self::create_json_data($data)) return self::error('no_json_data');
 
-        return self::parse_response(self::http_request('PUT', $json_data));
+        return self::http_request('PUT', $json_data);
     }
 	
     public function get_doc() {
@@ -101,13 +93,13 @@ class CouchDB_PHP {
         if(!self::is_id_set()) return self::error('no_id');
         $this->request = "{$this->db}/{$this->id}/";
 		
-        return self::parse_response(self::http_request());
+        return self::http_request();
     }
 	
     public function get_all_docs() {
         if(!self::is_db_set()) return self::error('no_db');
         $this->request = "{$this->db}/_all_docs/";
-        return self::parse_response(self::http_request());
+        return self::http_request();
     }
 	
     public function delete_doc($data) {
@@ -116,39 +108,49 @@ class CouchDB_PHP {
         if(!self::is_id_set()) return self::error('no_id');
         $this->request = "{$this->db}/{$this->id}?rev={$data['_rev']}" ;
 		
-        return self::parse_response(self::http_request('DELETE'));
+        return self::http_request('DELETE');
     }
 	
     public function http_request($type = 'GET', $json_data = '') {
+        if(!function_exists('curl_init')) {
+            return self::error('no_curl');
+        }
+        
         $ch = curl_init();
-
+                
         if($type == 'PUT' || $type == 'POST') {
             if(!empty($json_data)) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
             } 
+        } elseif ($type == 'GET' || $type == 'DELETE') {
+        } else {
+            return self::error('invalid_http_method');
         }
 
-        curl_setopt($ch, CURLOPT_URL, self::create_url());
+        curl_setopt($ch, CURLOPT_URL, self::create_request_url());
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_USERAGENT, 'CouchDB_PHP');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
 		
-        $result = curl_exec($ch);
+        $response = curl_exec($ch);
         curl_close($ch);
 		
-        return $result;
+        return self::parse_response($response);
     }
 	
-    protected function create_url() {
+    protected function create_request_url() {
         if(empty($this->request)) return self::error('create_url_no_request');
         return "{$this->protocol}://{$this->host}:{$this->port}/{$this->request}";
     }
 	
-    protected function parse_response($response) {
-        return ($this->response_type == 'array') ? json_decode($response, true) : $response;
+    protected function parse_response($json_response) {
+        $array_response = json_decode($response, true);
+        $this->last_id = $array_response['id']; 
+
+        return ($this->response_type == 'array') ? $array_response : $json_response;
     }
-	
+    	
     protected function create_json_data($data) {
         return (!$json_data = json_encode($data)) ? false : $json_data;
     }
@@ -185,7 +187,15 @@ class CouchDB_PHP {
 			
             case 'create_url_no_request':
                 return self::parse_response('{"error":"create url impossible", "reason":"no request set"}');
-            break;		
+            break;	
+            
+            case 'no_curl':
+                return self::parse_response('{"error":"operation impossible", "reason":"PHP curl is not available"}');
+            break;
+            
+            case 'invalid_http_method':
+                return self::parse_response('{"error":"operation impossible", "reason":"not supported HTTP methode"}');
+            break;	
         }
     }
 }
