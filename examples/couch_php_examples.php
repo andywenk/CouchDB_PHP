@@ -11,16 +11,20 @@
  * Andy Wenk <andy@nms.de> 
  */
 include_once('../src/CouchDB_PHP.php');
-
-$couch = new CouchDB_PHP('hanswurst');
 $res = '';
 
+$couch = new CouchDB_PHP();
 
+// create a database 
+$res = $couch->create_db('firlefanz3');
+
+/*
 // create a document
 $couch->set_id('prod_6');
 $data = array("name" => "andy", "alter" => 14);
 $res = $couch->create_doc($data);
 echo $couch->get_last_id();
+*/
 
 /*
 // update a document 

@@ -54,18 +54,18 @@ class CouchDB_PHP {
     public function show_all_dbs() {
         $this->request = '_all_dbs/';
 		
-        return self::parse_response(self::http_request());
+        return self::http_request();
     }
 	
     public function create_db($name) {
         $this->request = "{$name}/";
         $this->db = $name;
-        return self::parse_response(self::http_request('PUT'));
+        return self::http_request('PUT');
     }
 	
     public function delete_db($name) {
         $this->request = "{$name}/";
-        return self::parse_response(self::http_request('DELETE'));
+        return self::http_request('DELETE');
     }
 	
     public function create_doc($data) {
@@ -145,8 +145,8 @@ class CouchDB_PHP {
     }
 	
     protected function parse_response($json_response) {
-        $array_response = json_decode($response, true);
-        $this->last_id = $array_response['id']; 
+        $array_response = json_decode($json_response, true);
+        $this->last_id = (array_key_exists('id', $array_response)) ? $array_response['id'] : ''; 
 
         return ($this->response_type == 'array') ? $array_response : $json_response;
     }
