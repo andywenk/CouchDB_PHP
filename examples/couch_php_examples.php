@@ -15,23 +15,37 @@ $res = '';
 
 $couch = new CouchDB_PHP();
 
+/*
+// show all db's
+$res = $couch->show_all_dbs();
+*/
+
+/*
 // create a database 
-$res = $couch->create_db('firlefanz3');
+$res = $couch->create_db('php_mag_5_10');
+*/
+
+/*
+// delete database
+$res = $couch->delete_db('php_mag_5_10');
+*/
+
+$couch = new CouchDB_PHP('php_mag_5_10');
 
 /*
 // create a document
-$couch->set_id('prod_6');
+//$couch->set_id('prod_6');
 $data = array("name" => "andy", "alter" => 14);
 $res = $couch->create_doc($data);
 echo $couch->get_last_id();
 */
 
-/*
+
 // update a document 
-$couch->set_id('38dd7a1c6b047125c69cd7af730292a7');
-$data = array("_rev" => "2-2b657242b821689922c052ab344c35cc", "name" => "anna", "alter" => 60);
+$couch->set_id('a733607681750a8aa9f14e5f25000c56');
+$data = array("_rev" => "2-43c04835d6a4d4ce2635a8e19bfaacbd", "Ausgabe" => "5.2010");
 $res = $couch->update_doc($data);
-*/
+
 
 /*
 // get a document by id
